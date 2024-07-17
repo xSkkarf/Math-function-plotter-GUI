@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QApplication, QMainWindow, QWidget, QAction
+from PySide2.QtWidgets import QApplication, QMainWindow, QWidget, QAction, QMessageBox, QVBoxLayout
 import sys
 
 class Window(QMainWindow):
@@ -30,7 +30,24 @@ class Window(QMainWindow):
         fileOption.addAction(exit_action)
 
     def exitApp(self):
-        self.close()
+        reply = self.createQuestionBox("Exit", "Are you sure you want to exit?")
+        if reply:
+            self.close()
+        else:
+            print("Exit cancelled.")
+    
+
+    def createQuestionBox(self, title, message):
+        reply = QMessageBox.question(self, title, message,
+                                    QMessageBox.Yes | QMessageBox.No)
+        
+        if reply == QMessageBox.Yes:
+            print("Yes clicked.")
+            return True
+        else:
+            print("No clicked.")
+            return False
+        
 
 
 
