@@ -1,5 +1,9 @@
-from PySide2.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QAction, QMessageBox, QVBoxLayout, QWidget, QLineEdit, QPushButton
+from PySide2.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QAction, QMessageBox, QVBoxLayout, QWidget, QLineEdit, QPushButton, QLabel, QGroupBox
+from PySide2.QtGui import QFont
 import sys
+import numpy
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 class Window(QMainWindow):
     def __init__(self):
@@ -8,30 +12,31 @@ class Window(QMainWindow):
         self.setGeometry(600, 200, 500, 500)
         self.setMinimumHeight(600)
         self.setMinimumWidth(900)
+        self.font = QFont("roboto", 12)
 
-        self.createMenu()
+        self.createMenuBar()
         self.createMainLayout()
 
         self.show()
 
-    def createMenu(self):
+    def createMenuBar(self):
         menuBar = self.menuBar()
         fileOption = menuBar.addMenu("File")
 
-        new_action = QAction("New", self)
-        open_action = QAction("Open", self)
-        save_action = QAction("Save", self)
-        save_action.setShortcut('ctrl+s')
-        save_action.triggered.connect(self.saveApp)
+        newAction = QAction("New", self)
+        openAction = QAction("Open", self)
+        saveAction = QAction("Save", self)
+        saveAction.setShortcut('ctrl+s')
+        saveAction.triggered.connect(self.saveApp)
 
-        exit_action = QAction("Exit", self)
-        exit_action.setShortcut('ctrl+w')
-        exit_action.triggered.connect(self.exitApp)
+        exitAction = QAction("Exit", self)
+        exitAction.setShortcut('ctrl+w')
+        exitAction.triggered.connect(self.exitApp)
 
-        fileOption.addAction(new_action)
-        fileOption.addAction(open_action)
-        fileOption.addAction(save_action)
-        fileOption.addAction(exit_action)
+        fileOption.addAction(newAction)
+        fileOption.addAction(openAction)
+        fileOption.addAction(saveAction)
+        fileOption.addAction(exitAction)
 
     def exitApp(self):
         reply = self.createQuestionBox("Exit", "Are you sure you want to exit?")
@@ -61,42 +66,67 @@ class Window(QMainWindow):
         
         
     def createMainLayout(self):
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
+        MainWidget = QWidget()
+        self.setCentralWidget(MainWidget)
         
-        main_layout = QHBoxLayout(central_widget)
+        mainLayout = QHBoxLayout(MainWidget)
         
-        self.createLeftSection(main_layout)
+        self.createLeftSection(mainLayout)
         
-        plot_area = QWidget()
-        plot_area.setStyleSheet("background-color: lightgray;")
-        main_layout.addWidget(plot_area, stretch=5)
+        plotArea = QWidget()
+        plotArea.setStyleSheet("background-color: lightgray;")
+        mainLayout.addWidget(plotArea, stretch=5)
 
-    def createLeftSection(self, main_layout):
-        left_section = QWidget()
-        left_section.setFixedWidth(300) 
-        left_layout = QVBoxLayout(left_section)
-        
-        self.function_input = QLineEdit()
-        self.function_input.setPlaceholderText("Enter function to plot")
-        left_layout.addWidget(self.function_input)
-        
-        plot_button = QPushButton("Plot")
-        plot_button.clicked.connect(self.plotFunction)
-        left_layout.addWidget(plot_button)
+    def createLeftSection(self, mainLayout):
+        leftSection = QWidget()
+        leftSection.setFixedWidth(300) 
+        leftLayout = QVBoxLayout(leftSection)
 
-        left_layout.addStretch()
+        functionGroupBox = QGroupBox("Function")
+        functionGroupBox.setFont(self.font)
+        functionLayout = QVBoxLayout()
         
-        main_layout.addWidget(left_section)
+        self.functionInput = QLineEdit()
+        self.functionInput.setPlaceholderText("Enter function to plot")
+        self.functionInput.setFont(self.font)
+        functionLayout.addWidget(self.functionInput)
+        
+        functionGroupBox.setLayout(functionLayout)
+        leftLayout.addWidget(functionGroupBox)
+
+        xRangeGroupBox = QGroupBox("X Range")
+        xRangeGroupBox.setFont(self.font)
+        xRangeLayout = QHBoxLayout()
+        
+        self.xMin = QLineEdit()
+        self.xMin.setPlaceholderText("x min value")
+        self.xMin.setFont(self.font)
+        xRangeLayout.addWidget(self.xMin)
+
+        self.xMax = QLineEdit()
+        self.xMax.setPlaceholderText("x max value")
+        self.xMax.setFont(self.font)
+        xRangeLayout.addWidget(self.xMax)
+
+        xRangeGroupBox.setLayout(xRangeLayout)
+        leftLayout.addWidget(xRangeGroupBox)
+
+        plotButton = QPushButton("Plot")
+        plotButton.setFont(self.font)
+        plotButton.clicked.connect(self.plotFunction)
+        leftLayout.addWidget(plotButton)
+
+        leftLayout.addStretch()
+        
+        mainLayout.addWidget(leftSection)
     
     def plotFunction(self):
-        function_text = self.function_input.text()
-        print(f"Function to plot: {function_text}")
+        functionText = self.functionInput.text()
+        print(f"Function to plot: {functionText}")
 
 
 
 myApp = QApplication(sys.argv)
 window = Window()
 
-myApp.exec_()
-sys.exit(0)
+sys.exit(myApp.exec_())
