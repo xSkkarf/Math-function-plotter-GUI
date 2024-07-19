@@ -1,9 +1,8 @@
 from PySide2.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QAction, QMessageBox, QVBoxLayout, QWidget, QLineEdit, QPushButton, QLabel, QGroupBox
 from PySide2.QtGui import QFont
 import sys
-import numpy
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+import plotCanvas
+
 
 class Window(QMainWindow):
     def __init__(self):
@@ -13,6 +12,8 @@ class Window(QMainWindow):
         self.setMinimumHeight(600)
         self.setMinimumWidth(900)
         self.font = QFont("roboto", 12)
+
+        self.latestWidget = None
 
         self.createMenuBar()
         self.createMainLayout()
@@ -69,13 +70,17 @@ class Window(QMainWindow):
         MainWidget = QWidget()
         self.setCentralWidget(MainWidget)
         
-        mainLayout = QHBoxLayout(MainWidget)
+        self.mainLayout = QHBoxLayout(MainWidget)
         
-        self.createLeftSection(mainLayout)
+        self.createLeftSection(self.mainLayout)
         
-        plotArea = QWidget()
-        plotArea.setStyleSheet("background-color: lightgray;")
-        mainLayout.addWidget(plotArea, stretch=5)
+        self.plotArea = QWidget()
+        self.plotArea.setStyleSheet("background-color: lightgray;")
+        self.mainLayout.addWidget(self.plotArea, stretch=5)
+        self.latestWidget = self.plotArea
+
+        
+
 
     def createLeftSection(self, mainLayout):
         leftSection = QWidget()
@@ -107,24 +112,58 @@ class Window(QMainWindow):
         self.xMax.setPlaceholderText("x max value")
         self.xMax.setFont(self.font)
         xRangeLayout.addWidget(self.xMax)
-
         xRangeGroupBox.setLayout(xRangeLayout)
+        
         leftLayout.addWidget(xRangeGroupBox)
+
+        stepGroupBox = QGroupBox("Step")
+        stepGroupBox.setFont(self.font)
+        stepLayout = QVBoxLayout()
+        
+        self.step = QLineEdit()
+        self.step.setPlaceholderText("step")
+        self.step.setFont(self.font)
+        stepLayout.addWidget(self.step)
+        stepGroupBox.setLayout(stepLayout)
+        leftLayout.addWidget(stepGroupBox)
 
         plotButton = QPushButton("Plot")
         plotButton.setFont(self.font)
         plotButton.clicked.connect(self.plotFunction)
         leftLayout.addWidget(plotButton)
 
+        clearButton = QPushButton("Clear")
+        clearButton.setFont(self.font)
+        clearButton.clicked.connect(self.clearPlotArea)
+        leftLayout.addWidget(clearButton)
+
         leftLayout.addStretch()
         
         mainLayout.addWidget(leftSection)
     
     def plotFunction(self):
-        functionText = self.functionInput.text()
-        print(f"Function to plot: {functionText}")
+        plot = plotCanvas.PlotCanvas(self.functionInput.text() or 'x', (self.xMin.text() or 0), (self.xMax.text() or 5), (self.step.text() or 1), self)
 
+        if self.latestWidget:
+            self.mainLayout.replaceWidget(self.latestWidget, plot)
+            self.latestWidget.deleteLater()
+        else:
+            self.mainLayout.addWidget(plot, stretch=5)
 
+        self.latestWidget = plot
+
+    def clearLatestWidget(self):
+        if self.latestWidget:
+            self.latestWidget.setParent(None)
+            self.latestWidget.deleteLater()
+            self.latestWidget = None
+
+    def clearPlotArea(self):
+        self.clearLatestWidget()
+        self.plotArea = QWidget()
+        self.plotArea.setStyleSheet("background-color: lightgray;")
+        self.mainLayout.addWidget(self.plotArea, stretch=5)
+        self.latestWidget = self.plotArea
 
 myApp = QApplication(sys.argv)
 window = Window()
