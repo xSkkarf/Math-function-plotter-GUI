@@ -1,6 +1,11 @@
-from PySide2.QtWidgets import  QHBoxLayout, QVBoxLayout, QWidget, QLineEdit, QPushButton, QGroupBox
+from PySide2.QtWidgets import  QHBoxLayout, QVBoxLayout, QWidget, QLineEdit, QPushButton, QGroupBox, QLabel, QMessageBox
 from plot.plotCanvas import PlotCanvas
+from plot.inputValidation import InvalidFunctionError
+from PySide2.QtCore import Qt
+from ui.instructions import instructions_text
 
+lastErrorType = 0
+errorCount = 0
 
 class InputSection:
     def createInputSection(self):
@@ -10,48 +15,41 @@ class InputSection:
 
         functionGroupBox = QGroupBox("Function")
         functionGroupBox.setFont(self.font)
-        functionLayout = QVBoxLayout()
+        functionLayout = QVBoxLayout(functionGroupBox)
 
         self.functionInput = QLineEdit()
         self.functionInput.setPlaceholderText("Enter function to plot")
         self.functionInput.setFont(self.font)
-        self.functionInput.setText("x")
         functionLayout.addWidget(self.functionInput)
 
-        functionGroupBox.setLayout(functionLayout)
         leftLayout.addWidget(functionGroupBox)
 
         xRangeGroupBox = QGroupBox("X Range")
         xRangeGroupBox.setFont(self.font)
-        xRangeLayout = QHBoxLayout()
+        xRangeLayout = QHBoxLayout(xRangeGroupBox)
 
         self.xMin = QLineEdit()
         self.xMin.setPlaceholderText("x min value")
         self.xMin.setFont(self.font)
-        self.xMin.setText("0")
 
         xRangeLayout.addWidget(self.xMin)
 
         self.xMax = QLineEdit()
         self.xMax.setPlaceholderText("x max value")
         self.xMax.setFont(self.font)
-        self.xMax.setText("5")
 
         xRangeLayout.addWidget(self.xMax)
-        xRangeGroupBox.setLayout(xRangeLayout)
 
         leftLayout.addWidget(xRangeGroupBox)
 
         stepGroupBox = QGroupBox("Step")
         stepGroupBox.setFont(self.font)
-        stepLayout = QVBoxLayout()
+        stepLayout = QVBoxLayout(stepGroupBox)
 
         self.step = QLineEdit()
         self.step.setPlaceholderText("step")
         self.step.setFont(self.font)
-        self.step.setText("1")
         stepLayout.addWidget(self.step)
-        stepGroupBox.setLayout(stepLayout)
         leftLayout.addWidget(stepGroupBox)
 
         leftLayout.addSpacing(10)
@@ -63,8 +61,20 @@ class InputSection:
 
         clearButton = QPushButton("Clear")
         clearButton.setFont(self.font)
-        clearButton.clicked.connect(self.clearPlotArea)
+        clearButton.clicked.connect(self.clearButtonAction)
         leftLayout.addWidget(clearButton)
+
+        leftLayout.addSpacing(10)
+        
+        errorConsole = QGroupBox("Error Console")
+        errorConsole.setFont(self.font)
+        errorConsoleLayout = QVBoxLayout(errorConsole)
+        self.errorStatement = QLabel()
+        self.errorStatement.setStyleSheet("color: red;")
+        self.errorStatement.setWordWrap(True)
+        errorConsoleLayout.addWidget(self.errorStatement)
+
+        leftLayout.addWidget(errorConsole)
 
         leftLayout.addStretch()
 
@@ -77,15 +87,41 @@ class InputSection:
 
 
     def plotFunction(self):
-        plot = PlotCanvas(self.functionInput.text() or 'x', (self.xMin.text() or 0), (self.xMax.text() or 5), (self.step.text() or 1), self)
+        global errorCount
+        # print(self.functionInput.text()=="")
+        try:
+            self.clearTextBoxesStyle()
+            self.clearErrorMessage()
 
-        if self.latestWidget:
-            self.mainLayout.replaceWidget(self.latestWidget, plot)
-            self.latestWidget.deleteLater()
-        else:
-            self.mainLayout.addWidget(plot, stretch=5)
+            self.plot = PlotCanvas(self,
+                            self.functionInput.text(),
+                            self.xMin.text(),
+                            self.xMax.text(),
+                            self.step.text())
+            if self.latestWidget:
+                self.mainLayout.replaceWidget(self.latestWidget, self.plot)
+                self.latestWidget.deleteLater()
+            else:
+                self.mainLayout.addWidget(self.plot, stretch=5)
+            
+            errorCount = 0
+            self.latestWidget = self.plot
+        except InvalidFunctionError as e:
+            self.showErrorMessage(e, "Invalid plot function, see Instructions for more information")
+        except Exception as e:
+            self.showErrorMessage(e, f"{e}")
 
-        self.latestWidget = plot
+
+
+
+    def clearButtonAction(self):
+        global errorCount
+        errorCount = 0
+        self.clearLatestWidget()
+        self.clearPlotArea()
+        self.clearTextBoxesStyle()
+        self.clearTextBoxes()
+        self.clearErrorMessage()
 
     def clearLatestWidget(self):
         if self.latestWidget:
@@ -99,13 +135,41 @@ class InputSection:
         self.xMax.clear()
         self.step.clear()
 
+    def clearTextBoxesStyle(self):
+        self.functionInput.setStyleSheet("")
+        self.xMin.setStyleSheet("")
+        self.xMax.setStyleSheet("")
+        self.step.setStyleSheet("")
+
+
     def clearPlotArea(self):
-        self.clearLatestWidget()
         self.plotArea = QWidget()
         self.plotArea.setStyleSheet("background-color: lightgray;")
         self.mainLayout.addWidget(self.plotArea, stretch=5)
         self.latestWidget = self.plotArea
-        self.clearTextBoxes()
+
+
+    def showErrorMessage(self, errorType, errorMessage):
+        global lastErrorType
+        global errorCount
+        
+
+        if str(lastErrorType) == str(errorType):
+            errorCount+=1
+        elif str(lastErrorType) != str(errorType):
+            errorCount = 1
+            lastErrorType = errorType    
+
+        self.clearErrorMessage()
+        self.errorStatement.setText(f"({errorCount}) {errorMessage}")
+
+    def clearErrorMessage(self):
+        self.errorStatement.setText("")
 
     def showInstructions(self):
-        self.createMessageBox("Instructions", "")
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle("Instructions")
+        msg_box.setTextFormat(Qt.RichText)
+        msg_box.setText(instructions_text)
+        msg_box.exec_()
+

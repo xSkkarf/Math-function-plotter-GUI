@@ -1,23 +1,29 @@
 import numpy as np
-from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from plot.regexMapper import regexMapper, replacement
-
+from plot.regexMapper import regexMapper
+from plot.inputValidation import validateInput
 
 class PlotCanvas(FigureCanvas):
-    def __init__(self, plotFunction, xMin, xMax, step, parent=None):
+    def __init__(self, inputSection, plotFunction, xMin, xMax, step):
+        
+        validateInput(self, inputSection, plotFunction, xMin, xMax, step)
+    
         figure, self.axes = plt.subplots()
         super(PlotCanvas, self).__init__(figure)
 
-        x = np.arange(float(xMin), float(xMax)+float(step), float(step))
+
+        xMin = regexMapper(xMin)
+        xMax = regexMapper(xMax)
+        step = regexMapper(step)
 
 
-        self.replacement = replacement
-        plotFunction = regexMapper(self, plotFunction)
-        f = eval(plotFunction)
+        x = np.arange(eval(xMin), eval(xMax)+eval(step), eval(step))
 
-        self.axes.set(xlabel='x', ylabel='F(x)', title='Function plotter :)')
+        mappedPlotFunction = regexMapper(plotFunction)
+        f = eval(mappedPlotFunction)
+
+        self.axes.set(xlabel='x', ylabel='F(x)', title=f'Function: {plotFunction}')
         self.axes.grid()
         
         self.axes.plot(x, f)
