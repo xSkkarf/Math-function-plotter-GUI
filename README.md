@@ -21,12 +21,15 @@ The Math Function Plotter GUI is a desktop application designed to plot mathemat
 - **Logarithms**: `log(x)`, `log10(x)`, `log2(x)`
 - **Constants**: `pi`, `e^x` (as `exp(x)`)
 
+## Binary Download
+### **[Google drive download link](https://drive.google.com/drive/folders/1m8Gzr1vzIQsg4dqpk0HOEYi_p2teswDM?usp=sharing)**
 
 ## Program Interface
 ![Screenshot from 2024-07-21 18-40-20](https://github.com/user-attachments/assets/bc56d134-aba1-4d34-8310-790904e65379)
 
 ## Instructions
 ![Screenshot from 2024-07-21 18-06-00](https://github.com/user-attachments/assets/aecd0c4f-98b6-4ca6-bb1b-9626582df849)
+
 
 ## Error Messages
 
