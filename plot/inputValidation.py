@@ -2,69 +2,145 @@
 from plot.regexMapper import regexMapper
 import numpy as np
 
-globalXMin = 0
-globalXMax = 0
 
+# Custom exception for invalid input in the plot function field
 class InvalidFunctionError(ValueError):
     pass
 
-def validateInput(self, inputSection, plotFunction, xMin, xMax, step):
-    if plotFunction == "":
+def validateInput(self, inputSection):
+    """
+    Validates the input for plotting a function.
+
+    Parameters:
+    self (object): The instance of the class calling this method.
+    inputSection (object): The object containing the input fields.
+    plotFunction (str): The mathematical function to be plotted.
+    xMin (str): The minimum value of the x-axis.
+    xMax (str): The maximum value of the x-axis.
+    step (str): The step value for the x-axis.
+
+    Returns:
+    None. Raises ValueError if any of the input validations fail.
+
+    Raises:
+    ValueError: If any of the following conditions are met:
+        - plotFunction is an empty string.
+        - xMin is an empty string.
+        - xMin is not a valid number.
+        - xMax is an empty string.
+        - xMax is not a valid number.
+        - xMax is not greater than xMin.
+        - step is an empty string.
+        - step is not a valid number.
+        - step is zero
+
+        (Optional depending on the requirements, I assumed that it's ok for the step to be greater than the range)
+        - step is greater than the x values range
+    InvalidFunctionError: If any of the following conditions are met:
+        - plotFunction is not a valid mathematical function.
+    """
+
+    # Checking empty plot function field
+    if self.plotFunction == "":
         inputSection.functionInput.setStyleSheet("border: 1.5px solid red;")
         raise ValueError("Enter a plot function")
     
+    # Checking invalid input in plot function field. This is actually a small test with dummy x-axis to validate the input.
     try:
-        mappedPlotFunction = regexMapper(plotFunction)
+        self.plotFunction = regexMapper(self.plotFunction)
         x = np.arange(0, 5, 1)
-        eval(mappedPlotFunction)
+        eval(self.plotFunction)
     except Exception as e:
-        # print(f"Error validating input: {e}")
-        inputSection.functionInput.setStyleSheet("border: 1.5px solid red;")
+        inputSection.functionInput.setStyleSheet("border: 1.5px solid red;")    # Red outline around plot function text box to indicate invalid input
         raise InvalidFunctionError(f"Invalid plot function {e}")
-
-    if xMin == "":
+    
+    # Checking empty xMin field
+    if self.xMin == "":
         inputSection.xMin.setStyleSheet("border: 1.5px solid red;")
         raise ValueError("Enter a minimum x value")
-    if not is_number(xMin, 1):
+    
+    # Checking if xMin is not a number
+    if not is_number(self, 1):
         inputSection.xMin.setStyleSheet("border: 1.5px solid red;")
         raise ValueError("Minimum x value should be a number")
     
-    if xMax == "":
+    # Checking empty xMax field
+    if self.xMax == "":
         inputSection.xMax.setStyleSheet("border: 1.5px solid red;")
         raise ValueError("Enter a maximum x value")
-    if not is_number(xMax, 2):
+    
+    # Checking if xMax is not a number
+    if not is_number(self, 2):
         inputSection.xMax.setStyleSheet("border: 1.5px solid red;")
         raise ValueError("Maximum x value should be a number")
     
-    if globalXMin >= globalXMax:
+    # Checking if the x value range is valid (xMin < xMax)
+    if self.xMin >= self.xMax:
         inputSection.xMax.setStyleSheet("border: 1.5px solid red;")
         inputSection.xMin.setStyleSheet("border: 1.5px solid red;")
         raise ValueError("Maximum x value should be greater than minimum x value")
     
-    if step == "":
+    # Checking empty step field
+    if self.step == "":
         inputSection.step.setStyleSheet("border: 1.5px solid red;")
         raise ValueError("Enter a step value")
-    if not is_number(step, 3):
+    
+    # Checking if step is not a number
+    if not is_number(self, 3):
         inputSection.step.setStyleSheet("border: 1.5px solid red;")
         raise ValueError("Step value should be a number")
     
+    # Checking if step is zero
+    if self.step == 0:
+        inputSection.step.setStyleSheet("border: 1.5px solid red;")
+        raise ValueError("Step value can't be zero")
 
-def is_number(value, id):
-    global globalXMin
-    global globalXMax
+def is_number(self, id):
+    """
+    This function checks if the input string can be evaluated as a number. It also catches the ValueError exception from the evaluateExpression function.
+
+    Parameters:
+    self (object): The instance of the class calling this method.
+    id (int): An identifier to determine which input field to check.
+        - 1: Check xMin field.
+        - 2: Check xMax field.
+        - 3: Check step field.
+
+    Returns:
+    bool: True if the input string can be evaluated as a number, False otherwise.
+
+    """
+
     try:
-        value = regexMapper(value)
         if id == 1:
-            globalXMin = evaluateExpression(value)
+            self.xMin = regexMapper(self.xMin)
+            self.xMin = evaluateExpression(self.xMin)
         elif id == 2:
-            globalXMax = evaluateExpression(value)
+            self.xMax = regexMapper(self.xMax)
+            self.xMax = evaluateExpression(self.xMax)
         elif id == 3:
-            evaluateExpression(value)
+            self.step = regexMapper(self.step)
+            self.step = evaluateExpression(self.step)
         return True
     except ValueError:
         return False  
 
 def evaluateExpression(expression):
+    """
+    Evaluates a mathematical expression.
+
+    This function takes a mathematical expression as a string and evaluates it using Python's built-in eval() function.
+    If the evaluation fails due to an exception, it raises a ValueError.
+
+    Parameters:
+    expression (str): The mathematical expression to be evaluated.
+
+    Returns:
+    float: The result of the evaluated expression.
+
+    Raises:
+    ValueError: If the evaluation fails due to an exception.
+    """
     try:
         return eval(expression)
     except Exception as e:
