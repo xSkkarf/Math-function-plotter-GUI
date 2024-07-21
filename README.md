@@ -89,3 +89,9 @@ The application provides feedback on input errors through visual cues. Below are
 - f(x) = x^3 + 6\*x^2 - 3\*x + 6
 ![image](https://github.com/user-attachments/assets/b2d15717-aa2f-4041-bb40-5abd45ec37c7)
 
+## Resources:
+1. [Pyside2 documentation](https://doc.qt.io/qtforpython-5/PySide2/QtWidgets/index.html)
+2. [Parwiz Forogh - YouTube - Pyside2 playlist](https://www.youtube.com/watch?v=oQTxJrDRCxg&list=PL1FgJUcJJ03tiCC6a7sF8NKLBPY4jRjmS&index=1)
+3. [Geeks for geeks - Python Regex](https://www.geeksforgeeks.org/python-regex/)
+4. [Corey Schafer - YouTube - Python Regex tutorial](https://www.youtube.com/watch?v=K8L6KVGG-7o)
+5. [PythonGUIs - Matplotlib with Pyside2](https://www.pythonguis.com/tutorials/pyside-plotting-matplotlib/)
