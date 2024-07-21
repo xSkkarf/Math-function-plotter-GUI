@@ -24,7 +24,7 @@ class PlotCanvas(FigureCanvas):
         f = eval(self.plotFunction)
 
         # Setting the plot configurations
-        self.axes.set(xlabel='x', ylabel='F(x)', title=f'Function: {self.plotFunction}')
+        self.axes.set(xlabel='x', ylabel='F(x)', title=f'Function: {plotFunction}')
         self.axes.grid()
         
         # Plotting the function on the canvas
