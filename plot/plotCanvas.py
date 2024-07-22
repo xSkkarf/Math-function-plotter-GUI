@@ -11,6 +11,7 @@ class PlotCanvas(FigureCanvas):
         self.xMax = xMax
         self.step = step
         self.plotFunction = plotFunction
+        self.isConstant = False
 
         # Check user input before creating the plot
         validateInput(self, inputSection)
@@ -21,7 +22,7 @@ class PlotCanvas(FigureCanvas):
 
         # Creating the x-axis range and the plot function
         x = np.arange(self.xMin, self.xMax+self.step, self.step)    
-        f = eval(self.plotFunction)
+        f = np.full_like(x,float(self.plotFunction)) if self.isConstant else eval(self.plotFunction)
 
         # Setting the plot configurations
         self.axes.set(xlabel='x', ylabel='F(x)', title=f'Function: {plotFunction}')

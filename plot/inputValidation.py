@@ -49,7 +49,11 @@ def validateInput(self, inputSection):
     try:
         self.plotFunction = regexMapper(self.plotFunction)
         x = np.arange(0, 5, 1)
-        eval(self.plotFunction)
+        if 'x' in self.plotFunction:
+            eval(self.plotFunction)
+        else:
+            self.isConstant = True
+
     except Exception as e:
         inputSection.functionInput.setStyleSheet("border: 1.5px solid red;")    # Red outline around plot function text box to indicate invalid input
         raise InvalidFunctionError(f"Invalid plot function {e}")
