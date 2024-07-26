@@ -32,7 +32,7 @@ def validateInput(self, inputSection):
         - xMax is not greater than xMin.
         - step is an empty string.
         - step is not a valid number.
-        - step is zero
+        - step is zero or less
 
         (Optional depending on the requirements, I assumed that it's ok for the step to be greater than the range)
         - step is greater than the x values range
@@ -95,9 +95,9 @@ def validateInput(self, inputSection):
         raise ValueError("Step value should be a number")
     
     # Checking if step is zero
-    if self.step == 0:
+    if self.step <= 0:
         inputSection.step.setStyleSheet("border: 1.5px solid red;")
-        raise ValueError("Step value can't be zero")
+        raise ValueError("Step value can't be zero or less")
 
 def is_number(self, id):
     """
