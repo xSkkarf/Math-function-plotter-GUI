@@ -49,9 +49,8 @@ def validateInput(self, inputSection):
     try:
         self.plotFunction = regexMapper(self.plotFunction)
         x = np.arange(0, 5, 1)
-        if 'x' in self.plotFunction:
-            eval(self.plotFunction)
-        else:
+        eval(self.plotFunction)
+        if 'x' not in self.plotFunction:
             self.isConstant = True
 
     except Exception as e:
